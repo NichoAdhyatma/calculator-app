@@ -35,7 +35,6 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
 
   int findOperation() {
     var temp = number.lastIndexOf(RegExp(r'[-+÷×]'));
-    print(temp);
     return temp;
   }
 
@@ -44,8 +43,11 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
     setState(() {
       if (isNotOperation()) {
         index > 0
-            ? number = number.replaceRange(index + 1, null,
-                (format(double.parse(number.substring(index)) * -1)).toString())
+            ? number = number.replaceRange(
+                index + 1,
+                null,
+                (format(double.parse(number.substring(index + 1)) * -1))
+                    .toString())
             : number = (format(double.parse(number) * -1)).toString();
       }
     });
@@ -59,9 +61,9 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
             ? number = number.replaceRange(
                 index + 1,
                 null,
-                (format(double.parse(number.substring(index)) / 100))
+                (double.parse(number.substring(index + 1)) / 100)
                     .toString())
-            : number = (format(double.parse(number) / 100)).toString();
+            : number = (double.parse(number) / 100).toString();
       });
     }
   }
@@ -70,10 +72,15 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
     int index = findOperation();
     if (isNotOperation()) {
       setState(() {
-        index > 0
-            ? number = number.replaceRange(index, null,
-                "${number.substring(index)}.")
-            : number = "$number.";
+        if (index > 0) {
+          !number.substring(index).contains('.')
+              ? number = number.replaceRange(
+                  index, null, "${number.substring(index)}.")
+              : null;
+        } else {
+          !number.contains('.') ?
+          number = "$number." : null;
+        }
       });
     }
   }
