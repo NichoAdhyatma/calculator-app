@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:calculator_app/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
@@ -13,38 +11,98 @@ class CalculatorLayout extends StatefulWidget {
 
 class _CalculatorLayoutState extends State<CalculatorLayout> {
   String number = '0';
-  String calculate = '0';
 
   void setNumber(String numberInput) {
     setState(() {
       if (number == '0') {
         number = numberInput;
-        calculate = numberInput;
       } else {
         number += numberInput;
-        calculate += numberInput;
       }
     });
   }
 
-  bool isOperation() {
-    if (calculate.characters.elementAt(calculate.length - 1).contains('+') ||
-        calculate.characters.elementAt(calculate.length - 1).contains('*') ||
-        calculate.characters.elementAt(calculate.length - 1).contains('-') ||
-        calculate.characters.elementAt(calculate.length - 1).contains('/')) {
+  bool isNotOperation() {
+    if (number.characters.elementAt(number.length - 1).contains('+') ||
+        number.characters.elementAt(number.length - 1).contains('×') ||
+        number.characters.elementAt(number.length - 1).contains('-') ||
+        number.characters.elementAt(number.length - 1).contains('÷')) {
       return false;
     } else {
       return true;
     }
   }
 
-  bool setOperation(String operation) {
-    if (isOperation()) {
-      calculate += operation;
-      return true;
-    }
+  int findOperation() {
+    var temp = number.lastIndexOf(RegExp(r'[-+÷×]'));
+    print(temp);
+    return temp;
+  }
 
-    return false;
+  void absNum() {
+    int index = findOperation();
+    setState(() {
+      if (isNotOperation()) {
+        index > 0
+            ? number = number.replaceRange(index + 1, null,
+                (format(double.parse(number.substring(index)) * -1)).toString())
+            : number = (format(double.parse(number) * -1)).toString();
+      }
+    });
+  }
+
+  void percentNum() {
+    int index = findOperation();
+    if (isNotOperation()) {
+      setState(() {
+        index > 0
+            ? number = number.replaceRange(
+                index + 1,
+                null,
+                (format(double.parse(number.substring(index)) / 100))
+                    .toString())
+            : number = (format(double.parse(number) / 100)).toString();
+      });
+    }
+  }
+
+  void decimalNum() {
+    int index = findOperation();
+    if (isNotOperation()) {
+      setState(() {
+        index > 0
+            ? number = number.replaceRange(index, null,
+                "${number.substring(index)}.")
+            : number = "$number.";
+      });
+    }
+  }
+
+  void calculateEval() {
+    number = number.replaceAll("×", "*");
+    number = number.replaceAll("÷", "/");
+
+    Parser p = Parser();
+    ContextModel cm = ContextModel();
+    Expression exp = p.parse(number);
+    var result = format(exp.evaluate(EvaluationType.REAL, cm) as double);
+
+    setState(() {
+      number = result.toString();
+    });
+  }
+
+  String format(double n) {
+    String numStr = n.toString();
+    int dotIndex = numStr.indexOf('.');
+
+    int decimalPlaces = numStr.substring(dotIndex + 1).length > 9
+        ? 9
+        : numStr.substring(dotIndex + 1).length;
+
+    return n.truncateToDouble() == n
+        ? n.toStringAsFixed(0)
+        : n.toStringAsFixed(decimalPlaces);
   }
 
   @override
@@ -90,7 +148,6 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                         onPressed: () {
                           setState(() {
                             number = '0';
-                            calculate = '0';
                           });
                         },
                         style: ElevatedButton.styleFrom(
@@ -102,10 +159,7 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            number = (int.parse(number) * -1).toString();
-                            calculate = number;
-                          });
+                          absNum();
                         },
                         style: ElevatedButton.styleFrom(
                             backgroundColor: accentColor),
@@ -116,9 +170,7 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            number = (int.parse(number) * 0.01).toString();
-                          });
+                          percentNum();
                         },
                         style: ElevatedButton.styleFrom(
                             backgroundColor: accentColor),
@@ -130,7 +182,7 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            setOperation("/") ? number += "÷" : null;
+                            isNotOperation() ? number += "÷" : null;
                           });
                         },
                         style: ElevatedButton.styleFrom(
@@ -175,7 +227,7 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            setOperation("*") ? number += "×" : null;
+                            isNotOperation() ? number += "×" : null;
                           });
                         },
                         style: ElevatedButton.styleFrom(
@@ -220,7 +272,7 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                       ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              setOperation("-") ? number += "-" : null;
+                              isNotOperation() ? number += "-" : null;
                             });
                           },
                           style: ElevatedButton.styleFrom(
@@ -261,7 +313,7 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            setOperation("+") ? number += "+" : null;
+                            isNotOperation() ? number += "+" : null;
                           });
                         },
                         style: ElevatedButton.styleFrom(
@@ -301,7 +353,9 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                         height: 90,
                         width: 90,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            decimalNum();
+                          },
                           style: ElevatedButton.styleFrom(
                               backgroundColor: secondaryColor),
                           child: const Text(
@@ -317,8 +371,8 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                         width: 90,
                         child: ElevatedButton(
                           onPressed: () {
-                            isOperation()
-                                ? null
+                            isNotOperation()
+                                ? calculateEval()
                                 : ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
@@ -326,16 +380,6 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                                       backgroundColor: Colors.redAccent,
                                     ),
                                   );
-                            Parser p = Parser();
-                            ContextModel cm = ContextModel();
-                            Expression exp = p.parse(calculate);
-
-                            setState(() {
-                              var result = exp.evaluate(EvaluationType.REAL, cm)
-                                  as double;
-                              number = result.toString();
-                              calculate = number;
-                            });
                           },
                           style: ElevatedButton.styleFrom(
                               backgroundColor: ternaryColor),
