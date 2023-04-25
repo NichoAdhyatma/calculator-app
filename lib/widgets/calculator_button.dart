@@ -1,4 +1,7 @@
+import 'package:calculator_app/constants/const.dart';
+import 'package:calculator_app/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CalculatorButton extends StatelessWidget {
   const CalculatorButton({
@@ -19,10 +22,17 @@ class CalculatorButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPress,
       style: style,
-      child: Text(
-        label,
-        style: color != null ? TextStyle(color: color) : null,
-      ),
+      child: label.contains('A')
+          ? Obx(
+              () => Text(
+                calculatorC.number.value != '0' ? "C" : label,
+                style: TextStyle(color: primaryColor),
+              ),
+            )
+          : Text(
+              label,
+              style: color != null ? TextStyle(color: color) : null,
+            ),
     );
   }
 }

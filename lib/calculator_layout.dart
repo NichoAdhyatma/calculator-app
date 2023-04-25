@@ -1,10 +1,8 @@
-import 'package:calculator_app/constants/button_list.dart';
-import 'package:calculator_app/controller/calculator_controller.dart';
 import 'package:calculator_app/theme.dart';
 import 'package:calculator_app/widgets/calculator_button_grid.dart';
+import 'package:calculator_app/widgets/number_container.dart';
 import 'package:calculator_app/widgets/row_button.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'constants/const.dart';
 
@@ -39,28 +37,9 @@ class _CalculatorLayoutState extends State<CalculatorLayout> {
                   ),
                 ),
               ),
-              Flexible(
+              const Flexible(
                 flex: 3,
-                child: ListView(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      constraints: const BoxConstraints(
-                          minHeight: 200, maxHeight: double.infinity),
-                      alignment: Alignment.bottomRight,
-                      child: Obx(() {
-                        var numText = calculatorC.number.value;
-                        return Text(
-                          numText,
-                          style: TextStyle(
-                              fontSize: numText.length > 20 ? 35 : 54),
-                          softWrap: true,
-                        );
-                      }),
-                    ),
-                  ],
-                ),
+                child: NumberContainer(),
               ),
               const Flexible(
                 flex: 7,
