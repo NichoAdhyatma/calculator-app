@@ -5,7 +5,6 @@ var primaryColor = const Color(0xFF222831);
 var secondaryColor = const Color(0xFF393E46);
 var ternaryColor = const Color(0xFFFD7014);
 var accentColor = const Color(0xFFEEEEEE);
-
 var whiteText = GoogleFonts.poppins(color: accentColor);
 
 var themeData = ThemeData(
